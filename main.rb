@@ -21,7 +21,7 @@ module TestStream
     end
 
     def initialize(client)
-      @event_data = { "something" => "has data" }.to_json
+      @event_data = { "something" => "has data", "value" => rand(100) }.to_json
       @client = client
     end
 
@@ -77,7 +77,7 @@ module TestStream
           if body.length > 0
             parsed_body = JSON.parse(body.to_s)
             @etag = parsed_body['eTag']
-            something = parsed_body['entries'].take_while { |i| i['title'] != @most_recent_event }  #=> [1, 2]
+            something = parsed_body['entries'].take_while { |i| i['title'] != @most_recent_event }
             @most_recent_event = parsed_body['entries'].first['title']
             HandleEvent.!(something)
           end
