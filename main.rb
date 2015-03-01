@@ -75,7 +75,11 @@ module TestStream
         resp.body_handler do |body|
           puts "The total body received was #{body.length} bytes"
           if body.length > 0
-            @etag = JSON.parse(body.to_s)['eTag']
+            parsed_body = JSON.parse(body.to_s)
+            @etag = parsed_body['eTag']
+            puts parsed_body
+            something = nil
+            HandleEvent.!(something)
           end
         end
       end
@@ -83,6 +87,11 @@ module TestStream
       request.put_header('Accept', 'application/vnd.eventstore.atom+json')
 
       request.end
+    end
+  end
+
+  class HandleEvent
+    def self.!(event)
     end
   end
 end
