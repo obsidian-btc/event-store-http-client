@@ -66,19 +66,19 @@ module TestStream
     end
 
     def !
-      Vertx.set_periodic(100) { make_request }
+      Vertx.set_periodic(50) { make_request }
     end
 
     def make_request
-      request = @client.get('/streams/newstream') do |resp|
+      request = @client.get('/streams/newstream?embed=body') do |resp|
         puts "got response #{resp.status_code}"
         resp.body_handler do |body|
           puts "The total body received was #{body.length} bytes"
           if body.length > 0
             parsed_body = JSON.parse(body.to_s)
             @etag = parsed_body['eTag']
-            puts parsed_body
-            something = nil
+            something = parsed_body['entries'].take_while { |i| i['title'] != @most_recent_event }  #=> [1, 2]
+            @most_recent_event = parsed_body['entries'].first['title']
             HandleEvent.!(something)
           end
         end
@@ -92,51 +92,10 @@ module TestStream
 
   class HandleEvent
     def self.!(event)
+      puts event
     end
   end
 end
 
 Vertx.set_periodic(500) { TestStream::WriteEvent.! }
 TestStream::Poll.!
-
-# "Initializing Client"
-# Succeeded in deploying verticle
-# got response 200
-# The total body received was 10809 bytes
-# got response 200
-# The total body received was 10809 bytes
-# got response 304
-# The total body received was 0 bytes
-# got response 304
-# The total body received was 0 bytes
-# "Initializing Client"
-# got response 304
-# The total body received was 0 bytes
-# got response 201
-# The total body received was 0 bytes
-
-# got response 200
-# The total body received was 10809 bytes
-# got response 304
-# The total body received was 0 bytes
-# got response 304
-# The total body received was 0 bytes
-# got response 304
-# The total body received was 0 bytes
-# got response 304
-# The total body received was 0 bytes
-# got response 201
-# The total body received was 0 bytes
-
-# got response 200
-# The total body received was 10809 bytes
-# got response 304
-# The total body received was 0 bytes
-# got response 304
-# The total body received was 0 bytes
-# got response 304
-# The total body received was 0 bytes
-# got response 304
-# The total body received was 0 bytes
-# got response 201
-# The total body received was 0 bytes
