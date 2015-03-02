@@ -63,15 +63,18 @@ module TestStream
 
     def initialize(client)
       @client = client
+      @starting_point = rand(500)
       @previous_link = nil
     end
 
     def !
+      p "Starting from #{@starting_point}"
       make_request
     end
 
     def make_request
-      link = @previous_link || '/streams/newstream'
+
+      p link = @previous_link || "/streams/newstream/#{@starting_point}/forward/20"
       body_embed = "#{link}?embed=body"
       request = @client.get(body_embed) do |resp|
         # puts "got response #{resp.status_code}"
@@ -79,13 +82,12 @@ module TestStream
           # puts "The total body received was #{body.length} bytes"
           if body.length > 0
             parsed_body = JSON.parse(body.to_s)
-            @etag = parsed_body['eTag']
 
             links = parsed_body['links']
             if previous_link = parsed_body['links'].find{|link| link['relation'] == 'previous'}
               @previous_link = previous_link['uri']
             end
-            parsed_body['entries'].map{|e| HandleEvent.!(e)}
+            parsed_body['entries'].reverse.map{|e| HandleEvent.!(e)}
           else
             p 'empty'
           end
@@ -93,7 +95,7 @@ module TestStream
 
         end
       end
-      # request.put_header('If-None-Match', etag)
+
       request.put_header('Accept', 'application/vnd.eventstore.atom+json')
       request.put_header('ES-LongPoll', 10)
 
