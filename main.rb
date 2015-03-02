@@ -1,8 +1,7 @@
 require 'vertx'
 
-@client = Vertx::HttpClient.new
-@client.port = 2113
-@client.host = 'localhost'
+require 'lib/eventstore/subscriptions/subscribe'
+require 'lib/eventstore/subscriptions/default_handler'
 
 module TestStream
   class WriteEvent
@@ -30,7 +29,7 @@ module TestStream
         # puts "got response #{resp.status_code}"
         resp.body_handler do |body|
           # puts "The total body received was #{body.length} bytes"
-          puts body
+          # puts body
         end
       end
 
@@ -44,82 +43,8 @@ module TestStream
       request.end
     end
   end
-
-  class Poll
-    attr_accessor :client
-    attr_accessor :stream_name
-    attr_accessor :starting_point
-    attr_accessor :previous_link
-
-    def self.!
-      instance = build
-      build.!
-    end
-
-    def self.build
-      new(client).tap do |instance|
-        starting_point = rand(500)
-        instance.starting_point = starting_point
-        stream_name = 'newstream'
-        instance.stream_name = stream_name
-        instance.previous_link = "/streams/#{stream_name}/#{starting_point}/forward/20"
-      end
-    end
-
-    def self.client
-      @client ||= Vertx::HttpClient.new.tap do |client|
-        p "Initializing Client"
-        client.port = 2113
-        client.host = 'localhost'
-      end
-    end
-
-    def initialize(client)
-      @client = client
-    end
-
-    def !
-      p "Starting from #{starting_point}"
-      make_request
-    end
-
-    def make_request
-      body_embed_link = "#{previous_link}?embed=body"
-      request = client.get(body_embed_link) do |resp|
-
-        resp.body_handler do |body|
-
-          if body.length > 0
-            parsed_body = JSON.parse(body.to_s)
-            links = parsed_body['links']
-
-            if previous_link = links.find{|link| link['relation'] == 'previous'}
-              @previous_link = previous_link['uri']
-            end
-
-            parsed_body['entries'].reverse.map{|e| HandleEvent.!(e)}
-          else
-            p 'There was an error with the request somehow.  Retrying'
-          end
-          make_request
-
-        end
-      end
-
-      request.put_header('Accept', 'application/vnd.eventstore.atom+json')
-      request.put_header('ES-LongPoll', 1)
-
-      request.end
-    end
-  end
-
-  class HandleEvent
-    def self.!(event)
-      time = JSON.parse(event['data'])['time']
-      puts "Elapsed Time: #{Time.now - Time.at(time)}"
-    end
-  end
 end
 
-Vertx.set_periodic(1653) { TestStream::WriteEvent.! }
-TestStream::Poll.!
+Vertx.set_periodic(100) { TestStream::WriteEvent.! }
+
+Eventstore::Subscriptions::Subscribe.!(starting_point: rand(500), stream: 'newstream', handler: Eventstore::Subscriptions::DefaultHandler)
