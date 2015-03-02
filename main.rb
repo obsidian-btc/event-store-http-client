@@ -21,15 +21,15 @@ module TestStream
     end
 
     def initialize(client)
-      @event_data = { "something" => "has data", "value" => rand(100) }.to_json
+      @event_data = { "something" => "has data", "value" => rand(100), "time" => Time.now.to_f }.to_json
       @client = client
     end
 
     def !
       request = client.post('/streams/newstream') do |resp|
-        puts "got response #{resp.status_code}"
+        # puts "got response #{resp.status_code}"
         resp.body_handler do |body|
-          puts "The total body received was #{body.length} bytes"
+          # puts "The total body received was #{body.length} bytes"
           puts body
         end
       end
@@ -63,28 +63,39 @@ module TestStream
 
     def initialize(client)
       @client = client
+      @previous_link = nil
     end
 
     def !
-      Vertx.set_periodic(50) { make_request }
+      make_request
     end
 
     def make_request
-      request = @client.get('/streams/newstream?embed=body') do |resp|
-        puts "got response #{resp.status_code}"
+      link = @previous_link || '/streams/newstream'
+      body_embed = "#{link}?embed=body"
+      request = @client.get(body_embed) do |resp|
+        # puts "got response #{resp.status_code}"
         resp.body_handler do |body|
-          puts "The total body received was #{body.length} bytes"
+          # puts "The total body received was #{body.length} bytes"
           if body.length > 0
             parsed_body = JSON.parse(body.to_s)
             @etag = parsed_body['eTag']
-            something = parsed_body['entries'].take_while { |i| i['title'] != @most_recent_event }
-            @most_recent_event = parsed_body['entries'].first['title']
-            HandleEvent.!(something)
+
+            links = parsed_body['links']
+            if previous_link = parsed_body['links'].find{|link| link['relation'] == 'previous'}
+              @previous_link = previous_link['uri']
+            end
+            parsed_body['entries'].map{|e| HandleEvent.!(e)}
+          else
+            p 'empty'
           end
+          make_request
+
         end
       end
-      request.put_header('If-None-Match', etag)
+      # request.put_header('If-None-Match', etag)
       request.put_header('Accept', 'application/vnd.eventstore.atom+json')
+      request.put_header('ES-LongPoll', 10)
 
       request.end
     end
@@ -92,10 +103,11 @@ module TestStream
 
   class HandleEvent
     def self.!(event)
-      puts event
+      time = JSON.parse(event['data'])['time']
+      puts "Elapsed Time: #{Time.now - Time.at(time)}"
     end
   end
 end
 
-Vertx.set_periodic(500) { TestStream::WriteEvent.! }
+Vertx.set_periodic(2_000) { TestStream::WriteEvent.! }
 TestStream::Poll.!
