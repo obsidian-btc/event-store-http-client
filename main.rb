@@ -46,11 +46,24 @@ module TestStream
   end
 
   class Poll
-    attr_reader :etag
-    attr_reader :client
+    attr_accessor :client
+    attr_accessor :stream_name
+    attr_accessor :starting_point
+    attr_accessor :previous_link
 
     def self.!
-      new(client).!
+      instance = build
+      build.!
+    end
+
+    def self.build
+      new(client).tap do |instance|
+        starting_point = rand(500)
+        instance.starting_point = starting_point
+        stream_name = 'newstream'
+        instance.stream_name = stream_name
+        instance.previous_link = "/streams/#{stream_name}/#{starting_point}/forward/20"
+      end
     end
 
     def self.client
@@ -63,33 +76,30 @@ module TestStream
 
     def initialize(client)
       @client = client
-      @starting_point = rand(500)
-      @previous_link = nil
     end
 
     def !
-      p "Starting from #{@starting_point}"
+      p "Starting from #{starting_point}"
       make_request
     end
 
     def make_request
+      body_embed_link = "#{previous_link}?embed=body"
+      request = client.get(body_embed_link) do |resp|
 
-      p link = @previous_link || "/streams/newstream/#{@starting_point}/forward/20"
-      body_embed = "#{link}?embed=body"
-      request = @client.get(body_embed) do |resp|
-        # puts "got response #{resp.status_code}"
         resp.body_handler do |body|
-          # puts "The total body received was #{body.length} bytes"
+
           if body.length > 0
             parsed_body = JSON.parse(body.to_s)
-
             links = parsed_body['links']
-            if previous_link = parsed_body['links'].find{|link| link['relation'] == 'previous'}
+
+            if previous_link = links.find{|link| link['relation'] == 'previous'}
               @previous_link = previous_link['uri']
             end
+
             parsed_body['entries'].reverse.map{|e| HandleEvent.!(e)}
           else
-            p 'empty'
+            p 'There was an error with the request somehow.  Retrying'
           end
           make_request
 
@@ -97,7 +107,7 @@ module TestStream
       end
 
       request.put_header('Accept', 'application/vnd.eventstore.atom+json')
-      request.put_header('ES-LongPoll', 10)
+      request.put_header('ES-LongPoll', 1)
 
       request.end
     end
@@ -111,5 +121,5 @@ module TestStream
   end
 end
 
-Vertx.set_periodic(2_000) { TestStream::WriteEvent.! }
+Vertx.set_periodic(1653) { TestStream::WriteEvent.! }
 TestStream::Poll.!
