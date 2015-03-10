@@ -1,11 +1,15 @@
 module Eventstore
   module Events
     class Write
+      Logger.register self
+
       attr_accessor :client
       attr_accessor :data
       attr_accessor :id
       attr_accessor :stream_name
       attr_accessor :type
+
+      dependency :logger, Logger
 
       def self.!(params)
         instance = build(params)
@@ -18,13 +22,15 @@ module Eventstore
         stream_name = params[:stream_name]
 
         new(type, data, stream_name, client).tap do |instance|
+          Logger.configure instance
           instance.id = java.util.UUID.randomUUID().to_s
         end
       end
 
       def self.client
+        logger = Logger.get self
         @client ||= Vertx::HttpClient.new.tap do |client|
-          p "Initializing Client"
+          logger.info "Initializing Client"
           client.port = 2113
           client.host = 'localhost'
         end
@@ -43,8 +49,7 @@ module Eventstore
 
       def make_request
         request = client.post("/streams/#{stream_name}") do |resp|
-          puts "got response #{resp.status_code}"
-          #
+          Logger.debug "Response #{resp.status_code}"
 
           resp.body_handler do |body|
 

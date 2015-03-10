@@ -7,15 +7,15 @@ class Retry
     logger.trace "Executing #{block}, attempt: #{attempt}"
     begin
       block.call(attempt)
-    rescue RetryableHandlingError => e
+    rescue RetryableError => e
       logger.info "Exception in #{block}, retrying"
       attempt += 1
       Retry.!(block, attempt)
-    rescue UnrecoverableHandlingError => e
+    rescue UnretryableError => e
       logger.error e
     end
   end
 end
 
-class RetryableHandlingError < StandardError ; end
-class UnrecoverableHandlingError < StandardError ; end
+class RetryableError < StandardError ; end
+class UnretryableError < StandardError ; end

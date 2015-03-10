@@ -1,9 +1,6 @@
 module Eventstore
   module Subscriptions
-
-
     class DefaultHandler
-
       def configure(receiver)
         receiver.handler = self
         self
@@ -15,8 +12,8 @@ module Eventstore
 
       def !(event, attempt=0)
         if rand(1000) < 200
-          raise UnrecoverableHandlingError if attempt > 0
-          raise RetryableHandlingError
+          raise UnretryableError if attempt > 0
+          raise RetryableError
         end
         time = JSON.parse(event['data'])['time']
         puts "Elapsed Time: #{Time.now - Time.at(time)}"
