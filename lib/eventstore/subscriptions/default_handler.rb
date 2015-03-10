@@ -1,22 +1,30 @@
 module Eventstore
   module Subscriptions
     class DefaultHandler
+      Logger.register self
+
+      dependency :logger, Logger
+
       def configure(receiver)
         receiver.handler = self
         self
       end
 
       def self.build
-        new
+        new.tap do |instance|
+          Logger.configure instance
+        end
       end
 
       def !(event, attempt=0)
+        logger.trace "Executing defaultHandler on event #: #{event['eventNumber']}"
         if rand(1000) < 200
           raise UnretryableError if attempt > 0
           raise RetryableError
         end
+
         time = JSON.parse(event['data'])['time']
-        puts "Elapsed Time: #{Time.now - Time.at(time)}"
+        logger.debug "Elapsed Time: #{Time.now - Time.at(time)}"
       end
     end
   end

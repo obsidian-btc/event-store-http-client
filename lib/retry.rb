@@ -1,5 +1,4 @@
 class Retry
-
   Logger.register self
 
   def self.!(block, attempt=0)
