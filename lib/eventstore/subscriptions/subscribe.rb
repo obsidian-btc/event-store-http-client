@@ -1,11 +1,15 @@
 module Eventstore
   module Subscriptions
     class Subscribe
+      Logger.register self
+
       attr_accessor :client
       attr_accessor :stream
       attr_accessor :starting_point
       attr_accessor :request_string
       attr_accessor :handler
+
+      dependency :logger, Logger
 
       def self.!(params)
         instance = build(params)
@@ -18,6 +22,7 @@ module Eventstore
         handler = params[:handler]
         new(client, stream, starting_point).tap do |instance|
           handler.configure instance
+          Logger.configure instance
         end
       end
 
@@ -36,15 +41,35 @@ module Eventstore
       end
 
       def !
-        p "Starting from #{starting_point}"
+        logger.info "Starting from #{starting_point}"
         @request_string = "/streams/#{stream}/#{starting_point}/forward/20"
         make_request
       end
 
+
+      class Retry
+        Logger.register self
+
+        def self.!(block, attempt=0)
+          logger = Logger.get self
+          logger.trace "Executing #{block}, attempt: #{attempt}"
+          begin
+            block.call(attempt)
+          rescue RetryableHandlingError => e
+            logger.info "Exception in #{block}, retrying"
+            attempt += 1
+            Retry.!(block, attempt)
+          rescue UnrecoverableHandlingError => e
+            logger.error e
+          end
+        end
+      end
+
+
       def make_request
         body_embed_link = "#{request_string}?embed=body"
 
-        p body_embed_link
+        logger.debug body_embed_link
 
         request = client.get(body_embed_link) do |resp|
 
@@ -54,11 +79,16 @@ module Eventstore
               parsed_body = JSON.parse(body.to_s)
               links = parsed_body['links']
 
+              parsed_body['entries'].reverse.map{|e|
+                Retry.!(->(attempt){
+                  handler.!(e, attempt)
+                  #persist_successfully_handled_event(e['id'])
+                })
+              }
+
               if previous_link = links.find{|link| link['relation'] == 'previous'}
                 @request_string = previous_link['uri']
               end
-
-              parsed_body['entries'].reverse.map{|e| handler.!(e)}
             else
               p 'There was an error with the request somehow.  Retrying'
             end
@@ -68,14 +98,17 @@ module Eventstore
         end
 
         request.put_header('Accept', 'application/vnd.eventstore.atom+json')
-        request.put_header('ES-LongPoll', 1)
+        request.put_header('ES-LongPoll', 15)
 
-        request.exception_handler { make_request }
+        request.exception_handler { |e|
+          logger.error "Exception in request: #{e}"
+          Vertx.set_timer(1_000) do
+            make_request
+          end
+        }
 
         request.end
       end
     end
   end
 end
-
-

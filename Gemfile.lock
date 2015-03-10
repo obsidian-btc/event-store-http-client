@@ -1,0 +1,58 @@
+PATH
+  remote: /Users/litch/code/obsidian/libraries/attribute
+  specs:
+    attribute (0.0.0)
+
+PATH
+  remote: /Users/litch/code/obsidian/libraries/dependency
+  specs:
+    dependency (0.0.0)
+      naught (= 1.0.0)
+
+PATH
+  remote: /Users/litch/code/obsidian/libraries/logger
+  specs:
+    logger (0.0.0)
+      logging (= 1.8.2)
+      naught (= 1.0.0)
+
+PATH
+  remote: /Users/litch/code/obsidian/libraries/null-attr
+  specs:
+    null_attr (0.0.0)
+      naught (= 1.0.0)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    diff-lcs (1.2.5)
+    little-plugger (1.1.3)
+    logging (1.8.2)
+      little-plugger (>= 1.1.3)
+      multi_json (>= 1.8.4)
+    multi_json (1.11.0)
+    naught (1.0.0)
+    rspec (3.2.0)
+      rspec-core (~> 3.2.0)
+      rspec-expectations (~> 3.2.0)
+      rspec-mocks (~> 3.2.0)
+    rspec-core (3.2.1)
+      rspec-support (~> 3.2.0)
+    rspec-expectations (3.2.0)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.2.0)
+    rspec-mocks (3.2.1)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.2.0)
+    rspec-support (3.2.2)
+
+PLATFORMS
+  java
+
+DEPENDENCIES
+  attribute!
+  dependency!
+  logger!
+  naught (= 1.0.0)
+  null_attr!
+  rspec (~> 3.2.0)

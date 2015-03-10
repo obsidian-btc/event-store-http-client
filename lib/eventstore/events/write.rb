@@ -43,8 +43,11 @@ module Eventstore
 
       def make_request
         request = client.post("/streams/#{stream_name}") do |resp|
-          # puts "got response #{resp.status_code}"
+          puts "got response #{resp.status_code}"
+          #
+
           resp.body_handler do |body|
+
             # puts "The total body received was #{body.length} bytes"
             # puts body
           end
@@ -55,6 +58,8 @@ module Eventstore
         request.put_header('Accept', 'application/vnd.eventstore.atom+json')
         request.put_header('Content-Length', data.length)
         request.put_header('Content-Type', 'application/json')
+
+        request.exception_handler { make_request }
 
         request.write_str(data)
 
