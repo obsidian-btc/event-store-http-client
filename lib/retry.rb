@@ -3,6 +3,7 @@ class Retry
 
   def self.!(block, attempt=0)
     logger = Logger.get self
+    p "Executing #{block}, attempt: #{attempt}"
     logger.trace "Executing #{block}, attempt: #{attempt}"
     begin
       block.call(attempt)
