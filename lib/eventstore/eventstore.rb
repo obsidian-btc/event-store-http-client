@@ -1,15 +1,10 @@
 module Eventstore
-  class RetryableHandlingError < StandardError ; end
-
-  class UnrecoverableHandlingError < StandardError ; end
-
-  def configure(subject, receiver=nil)
-    receiver ||= subject
-    eventstore = get(subject)
-    receiver.eventstore = eventstore
-    eventstore
-  end
-
-  def get(subject)
+  module Writer
+    def self.configure(receiver)
+      es_writer = Eventstore::Events::Write
+      receiver.es_writer = es_writer
+      es_writer
+    end
   end
 end
+
