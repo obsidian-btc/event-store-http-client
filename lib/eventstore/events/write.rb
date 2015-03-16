@@ -55,7 +55,7 @@ module Eventstore
         request = client.post("/streams/#{stream_name}") do |resp|
           logger.debug "Response #{resp.status_code}"
 
-          if resp.status_code == '201'
+          if resp.status_code == 201
             yield :success if block_given?
           else
             yield resp.status_code if block_given?
