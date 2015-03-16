@@ -1,7 +1,6 @@
 module Eventstore
   module Events
     class Write
-      Logger.register self
 
       attr_accessor :client
       attr_accessor :data
@@ -13,7 +12,9 @@ module Eventstore
 
       def self.!(params)
         instance = build(params)
-        instance.!
+        instance.! do |result|
+          yield result
+        end
       end
 
       def self.build(params)
@@ -44,15 +45,22 @@ module Eventstore
       end
 
       def !
-        make_request
+        make_request do |result|
+          yield result
+        end
       end
 
       def make_request
+        logger.debug "Making request to #{stream_name}"
         request = client.post("/streams/#{stream_name}") do |resp|
-          Logger.debug "Response #{resp.status_code}"
+          logger.debug "Response #{resp.status_code}"
 
+          if resp.status_code == '201'
+            yield :success if block_given?
+          else
+            yield resp.status_code if block_given?
+          end
           resp.body_handler do |body|
-
             # puts "The total body received was #{body.length} bytes"
             # puts body
           end
@@ -64,7 +72,12 @@ module Eventstore
         request.put_header('Content-Length', data.length)
         request.put_header('Content-Type', 'application/json')
 
-        request.exception_handler { make_request }
+        request.exception_handler { |e|
+          logger.error "Event #{id} failed to write, trying again"
+          Vertx.set_timer(rand(1000)) do
+            make_request
+          end
+        }
 
         request.write_str(data)
 
