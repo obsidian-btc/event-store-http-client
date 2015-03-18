@@ -51,7 +51,10 @@ module Eventstore
           logger.debug "Response #{resp.status_code}"
 
           resp.body_handler do |body|
-            yield body
+            status = resp.status_code == 200 ? :success : :error
+            yield({ status: status,
+                    status_code: resp.status_code,
+                    body: body})
           end
         end
 
@@ -60,7 +63,7 @@ module Eventstore
         request.put_header('Content-Type', 'application/json')
 
         request.exception_handler { |e|
-          logger.error "Event #{id} failed to read, trying again"
+          logger.error "Projection failed to query state, trying again"
           Vertx.set_timer(rand(1000)) do
             make_request
           end

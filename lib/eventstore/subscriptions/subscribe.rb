@@ -28,7 +28,7 @@ module Eventstore
 
       def self.client
         @client ||= Vertx::HttpClient.new.tap do |client|
-          p "Initializing Client"
+          p "Initializing Subscribe Client"
           client.port = 2113
           client.host = 'localhost'
         end
@@ -60,7 +60,8 @@ module Eventstore
               links = parsed_body['links']
 
               parsed_body['entries'].reverse.map{|e|
-                Retry.!(->(attempt){
+                logger.trace "Executing handler for #{e} with #{handler.inspect}"
+                ::Retry.!(->(attempt){
                   handler.!(e, attempt)
                   #persist_successfully_handled_event(e['id'])
                 })
@@ -69,10 +70,14 @@ module Eventstore
               if previous_link = links.find{|link| link['relation'] == 'previous'}
                 @request_string = previous_link['uri']
               end
+              make_request
             else
-              p 'There was an error with the request somehow.  Retrying'
+              logger.error "There was an error (#{resp.status_code}) with the subscription request.  Retrying"
+              Vertx.set_timer(rand(1000)) do
+                make_request
+              end
             end
-            make_request
+
 
           end
         end

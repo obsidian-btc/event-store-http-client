@@ -3,18 +3,26 @@ require 'vertx'
 require 'init'
 require 'eventstore/subscriptions/default_handler'
 
+module Example
+  module EventStore
+    module Writer
+      extend ::Eventstore::Writer
+    end
+  end
+end
+
 class Something
   dependency :es_writer
 
   def work
     es_writer.!(type: "EventType",
                 data: { "something" => "has data", "value" => rand(100), "time" => Time.now.to_f },
-                stream_name: 'newstream')
+                stream_name: 'test-stream')
   end
 
   def self.build
     new.tap do |instance|
-      Eventstore::Writer.configure instance
+      Example::EventStore::Writer.configure instance
     end
   end
 end
