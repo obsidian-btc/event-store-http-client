@@ -1,7 +1,7 @@
 module EventStore
-  class Settings
+  class Settings < ::Settings
     def self.instance
-      @instance ||= ::Settings.build('settings.json')
+      @instance ||= build
     end
   end
 end
