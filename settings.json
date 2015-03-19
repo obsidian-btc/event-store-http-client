@@ -1,4 +1,5 @@
-{
-  "host": "localhost",
-  "port": 2113
-}
+
+  {
+    "host": "localhost",
+    "port": 2113
+  }

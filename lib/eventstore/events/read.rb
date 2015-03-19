@@ -21,7 +21,7 @@ module Eventstore
 
         new(stream_name).tap do |instance|
           Logger.configure instance
-          EventStore::Connector.configure instance
+          EventStore::Client::Builder.configure instance
         end
       end
 

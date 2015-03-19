@@ -28,7 +28,7 @@ module Eventstore
 
         new(type, data, stream_name, version).tap do |instance|
           Logger.configure instance
-          EventStore::Connector.configure instance
+          EventStore::Client::Builder.configure instance
           instance.id = UUID::Random.get
         end
       end

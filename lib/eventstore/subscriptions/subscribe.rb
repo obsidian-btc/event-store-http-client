@@ -22,7 +22,7 @@ module Eventstore
         handler = params[:handler]
         new(stream, starting_point).tap do |instance|
           handler.configure instance
-          EventStore::Connector.configure instance
+          EventStore::Client::Builder.configure instance
           Logger.configure instance
         end
       end
