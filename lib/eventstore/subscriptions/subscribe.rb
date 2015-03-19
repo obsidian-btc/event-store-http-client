@@ -3,12 +3,12 @@ module Eventstore
     class Subscribe
       Logger.register self
 
-      attr_accessor :client
       attr_accessor :stream
       attr_accessor :starting_point
       attr_accessor :request_string
       attr_accessor :handler
 
+      dependency :client
       dependency :logger, Logger
 
       def self.!(params)
@@ -22,15 +22,8 @@ module Eventstore
         handler = params[:handler]
         new(client, stream, starting_point).tap do |instance|
           handler.configure instance
+          EventStore::Connector.configure instance
           Logger.configure instance
-        end
-      end
-
-      def self.client
-        @client ||= Vertx::HttpClient.new.tap do |client|
-          p "Initializing Subscribe Client"
-          client.port = 2113
-          client.host = 'localhost'
         end
       end
 

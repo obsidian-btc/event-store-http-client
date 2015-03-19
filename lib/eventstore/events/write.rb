@@ -2,7 +2,6 @@ module Eventstore
   module Events
     class Write
 
-      attr_accessor :client
       attr_accessor :data
       attr_accessor :id
       attr_accessor :stream_name
@@ -12,6 +11,7 @@ module Eventstore
 
       dependency :logger, Logger
       dependency :settings
+      dependency :client
 
       def self.!(params)
         instance = build(params)
@@ -28,7 +28,7 @@ module Eventstore
 
         new(type, data, stream_name, version).tap do |instance|
           Logger.configure instance
-          instance.settings = EventStore::Settings.instance
+          EventStore::Connector.configure instance
           instance.id = UUID::Random.get
         end
       end
@@ -38,14 +38,6 @@ module Eventstore
         @data = data
         @stream_name = stream_name
         @version = version
-      end
-
-      def client
-        logger.trace "Initializing Client with (Settings: #{settings.inspect})"
-        @client ||= Vertx::HttpClient.new.tap do |_client|
-          _client.port = settings.get :port
-          _client.host = settings.get :host
-        end
       end
 
       def !

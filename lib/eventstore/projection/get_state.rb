@@ -2,10 +2,10 @@ module Eventstore
   module Projection
     class GetState
 
-      attr_accessor :client
       attr_accessor :projection
       attr_accessor :partition
 
+      dependency :client
       dependency :logger, Logger
 
       def self.!(params)
@@ -21,15 +21,7 @@ module Eventstore
 
         new(projection, partition, client).tap do |instance|
           Logger.configure instance
-        end
-      end
-
-      def self.client
-        logger = Logger.get self
-        @client ||= Vertx::HttpClient.new.tap do |client|
-          logger.info "Initializing Client"
-          client.port = 2113
-          client.host = 'localhost'
+          EventStore::Connector.configure instance
         end
       end
 
