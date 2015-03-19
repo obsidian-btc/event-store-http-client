@@ -19,16 +19,15 @@ module Eventstore
         projection = params[:projection]
         partition = params[:partition]
 
-        new(projection, partition, client).tap do |instance|
+        new(projection, partition).tap do |instance|
           Logger.configure instance
           EventStore::Connector.configure instance
         end
       end
 
-      def initialize(projection, partition, client)
+      def initialize(projection, partition)
         @projection = projection
         @partition = partition
-        @client = client
       end
 
       def !

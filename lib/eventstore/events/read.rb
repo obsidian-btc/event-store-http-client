@@ -19,15 +19,14 @@ module Eventstore
         body = params[:body]
         stream_name = params[:stream_name]
 
-        new(stream_name, client).tap do |instance|
+        new(stream_name).tap do |instance|
           Logger.configure instance
           EventStore::Connector.configure instance
         end
       end
 
-      def initialize(stream_name, client)
+      def initialize(stream_name)
         @stream_name = stream_name
-        @client = client
       end
 
       def !
