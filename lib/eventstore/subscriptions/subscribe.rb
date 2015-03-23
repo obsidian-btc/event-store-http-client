@@ -1,7 +1,6 @@
 module Eventstore
   module Subscriptions
     class Subscribe
-      Logger.register self
 
       attr_accessor :stream
       attr_accessor :starting_point

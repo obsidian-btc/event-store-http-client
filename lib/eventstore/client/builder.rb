@@ -7,7 +7,7 @@ module EventStore
 
       def self.build
         new.tap do |instance|
-          EventStore::Settings.instance.set instance
+          EventStore::Settings.instance.set instance, 'event_store'
         end
       end
 

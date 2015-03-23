@@ -1,7 +1,6 @@
 module Eventstore
   module Subscriptions
     class DefaultHandler
-      Logger.register self
 
       dependency :logger, Logger
 
