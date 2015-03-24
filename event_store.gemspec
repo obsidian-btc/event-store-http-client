@@ -1,7 +1,7 @@
 # -*- encoding: utf-8 -*-
 Gem::Specification.new do |s|
-  s.name = 'eventstore'
-  s.summary = 'HTTP Eventstore client'
+  s.name = 'event_store'
+  s.summary = 'HTTP EventStore client'
   s.version = '0.0.0'
   s.authors = ['']
   s.require_paths = ['lib']

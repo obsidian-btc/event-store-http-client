@@ -1,4 +1,4 @@
-module Eventstore
+module EventStore
   module Subscriptions
     class DefaultHandler
 
@@ -31,7 +31,7 @@ end
 
 
 # module Customers
-#   module Eventstore
+#   module EventStore
 #     class MultiCommandHandler
 #       Logger.register self
 #       dependency :logger, Logger

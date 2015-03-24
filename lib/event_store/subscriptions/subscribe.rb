@@ -1,4 +1,4 @@
-module Eventstore
+module EventStore
   module Subscriptions
     class Subscribe
 

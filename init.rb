@@ -10,4 +10,6 @@ Dependency.activate
 require 'logger'
 
 require 'retry'
-require 'eventstore'
+p "About to require eventstore"
+require 'event_store'
+p "Required eventstore"

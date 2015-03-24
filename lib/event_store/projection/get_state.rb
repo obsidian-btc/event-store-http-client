@@ -1,9 +1,9 @@
-module Eventstore
-  module Events
-    class Read
+module EventStore
+  module Projection
+    class GetState
 
-      attr_accessor :stream_name
-      attr_accessor :body
+      attr_accessor :projection
+      attr_accessor :partition
 
       dependency :client
       dependency :logger, Logger
@@ -16,17 +16,18 @@ module Eventstore
       end
 
       def self.build(params)
-        body = params[:body]
-        stream_name = params[:stream_name]
+        projection = params[:projection]
+        partition = params[:partition]
 
-        new(stream_name).tap do |instance|
+        new(projection, partition).tap do |instance|
           Logger.configure instance
           EventStore::Client::Builder.configure instance
         end
       end
 
-      def initialize(stream_name)
-        @stream_name = stream_name
+      def initialize(projection, partition)
+        @projection = projection
+        @partition = partition
       end
 
       def !
@@ -36,29 +37,29 @@ module Eventstore
       end
 
       def make_request
-        logger.debug "Making request to #{stream_name}"
-        request = client.get("/streams/#{stream_name}?embed=body") do |resp|
+        logger.debug "Making request to /projection/#{projection}/state?partition=#{partition}"
+        request = client.get("/projection/#{projection}/state?partition=#{partition}") do |resp|
           logger.debug "Response #{resp.status_code}"
 
           resp.body_handler do |body|
             status = resp.status_code == 200 ? :success : :error
             yield({ status: status,
                     status_code: resp.status_code,
-                    body: body.to_s})
+                    body: body})
           end
         end
 
-        request.put_header('Accept', 'application/vnd.eventstore.atom+json')
+        # If I put this 'Accept' header in, it returns a 406.  Else, it works
+        # request.put_header('Accept', 'application/vnd.eventstore.atom+json')
         request.put_header('Content-Type', 'application/json')
 
         request.exception_handler { |e|
-          logger.error "Failed to read, trying again"
+          logger.error "Projection failed to query state, trying again"
           Vertx.set_timer(rand(1000)) do
-            make_request do |result|
-              yield result
-            end
+            make_request
           end
         }
+
 
         request.end
       end

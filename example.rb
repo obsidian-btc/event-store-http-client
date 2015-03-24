@@ -1,12 +1,12 @@
 require 'vertx'
 
 require 'init'
-require 'eventstore/subscriptions/default_handler'
+require 'event_store/subscriptions/default_handler'
 
 module Example
   module EventStore
     module Writer
-      extend ::Eventstore::Writer
+      extend ::EventStore::Writer
     end
   end
 end
@@ -33,4 +33,4 @@ Vertx.set_periodic(100) {
   something.work
 }
 
-Eventstore::Subscriptions::Subscribe.!(starting_point: 0, stream: 'newstream', handler: Eventstore::Subscriptions::DefaultHandler.build)
+EventStore::Subscriptions::Subscribe.!(starting_point: 0, stream: 'newstream', handler: EventStore::Subscriptions::DefaultHandler.build)
