@@ -8,6 +8,7 @@ Settings.activate
 
 require 'retry'
 require 'event_store/settings'
+require 'event_store/handler'
 require 'event_store/client/builder'
 require 'event_store/event_store'
 require 'event_store/events/read'

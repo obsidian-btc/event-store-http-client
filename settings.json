@@ -1,4 +1,4 @@
-{"event_store":
+{"event_store_connection":
   {
     "host": "localhost",
     "port": 2113
