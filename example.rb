@@ -5,11 +5,11 @@ require 'init'
 module Example
   module EventStore
     module Writer
-      extend ::EventStore::Writer
+      extend ::EventStore::HttpClient::Writer
     end
 
     class Handler
-      include ::EventStore::Handler
+      include ::EventStore::HttpClient::Handler
 
       def command(event)
         if event['eventType'] == 'exampleEventType'
@@ -60,4 +60,4 @@ Vertx.set_periodic(100) {
   something.work
 }
 
-EventStore::Subscriptions::Subscribe.!(starting_point: 0, stream: 'newstream', handler: Example::EventStore::Handler.build)
+EventStore::HttpClient::Subscriptions::Subscribe.!(starting_point: 0, stream: 'newstream', handler: Example::EventStore::Handler.build)
