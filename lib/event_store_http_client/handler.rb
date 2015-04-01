@@ -1,5 +1,5 @@
 module EventStore
-  module HttpClient
+  module HTTPClient
     module Handler
       def self.included(cls)
         cls.send :dependency, :logger, Logger

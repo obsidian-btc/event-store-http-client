@@ -1,5 +1,5 @@
 module EventStore
-  module HttpClient
+  module HTTPClient
     module Projection
       class GetState
 
@@ -22,7 +22,7 @@ module EventStore
 
           new(projection, partition).tap do |instance|
             Logger.configure instance
-            EventStore::HttpClient::Client::Builder.configure instance
+            EventStore::HTTPClient::Client::Builder.configure instance
           end
         end
 

@@ -1,5 +1,5 @@
 module EventStore
-  module HttpClient
+  module HTTPClient
     module Events
       class Write
 
@@ -29,7 +29,7 @@ module EventStore
 
           new(type, data, stream_name, version).tap do |instance|
             Logger.configure instance
-            EventStore::HttpClient::Client::Builder.configure instance
+            EventStore::HTTPClient::Client::Builder.configure instance
             instance.id = UUID::Random.get
           end
         end

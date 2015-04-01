@@ -1,5 +1,5 @@
 module EventStore
-  module HttpClient
+  module HTTPClient
     class Settings < ::Settings
       def self.instance
         @instance ||= build

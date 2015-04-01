@@ -1,5 +1,14 @@
 module EventStore
-  module HttpClient
+  module HTTPClient
+
+    def self.subscribe(starting_point, stream, handler)
+      Subscriptions::Subscribe.!(
+        starting_point: staring_point,
+        stream: stream,
+        handler: handler
+      )
+    end
+
     module Subscriptions
       class Subscribe
 
@@ -22,7 +31,7 @@ module EventStore
           handler = params[:handler]
           new(stream, starting_point).tap do |instance|
             handler.configure instance
-            EventStore::HttpClient::Client::Builder.configure instance
+            EventStore::HTTPClient::Client::Builder.configure instance
             Logger.configure instance
           end
         end
