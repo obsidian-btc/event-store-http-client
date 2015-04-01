@@ -10,11 +10,8 @@ class Retry
       logger.info "Exception in #{block}, retrying"
       attempt += 1
       Retry.!(block, attempt)
-    rescue UnretryableError => e
-      logger.error e
     end
   end
 end
 
 class RetryableError < StandardError ; end
-class UnretryableError < StandardError ; end
