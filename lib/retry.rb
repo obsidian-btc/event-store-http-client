@@ -1,6 +1,4 @@
 class Retry
-  Logger.register self
-
   def self.!(block, attempt=0)
     logger = Logger.get self
     logger.debug "Executing #{block}, attempt: #{attempt}"
