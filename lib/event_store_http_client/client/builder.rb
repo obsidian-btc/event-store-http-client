@@ -17,7 +17,7 @@ module EventStore
           logger = Logger.get self
           logger.trace "Configuring Client"
 
-          client = Vertx::HTTPClient.new.tap do |client|
+          client = Vertx::HttpClient.new.tap do |client|
             client.host = instance.host
             client.port = instance.port
           end
