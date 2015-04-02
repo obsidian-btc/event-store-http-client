@@ -3,7 +3,7 @@ module EventStore
 
     def self.subscribe(starting_point, stream, handler)
       Subscriptions::Subscribe.!(
-        starting_point: staring_point,
+        starting_point: starting_point,
         stream: stream,
         handler: handler
       )
