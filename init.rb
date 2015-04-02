@@ -11,5 +11,5 @@ require 'logger'
 
 require 'retry'
 p "About to require eventstore"
-require 'event_store'
+require 'event_store_http_client'
 p "Required eventstore"
