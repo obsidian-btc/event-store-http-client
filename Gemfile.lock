@@ -12,7 +12,9 @@ PATH
   remote: /Users/litch/code/obsidian/dependency
   specs:
     dependency (0.0.0)
+      attribute
       naught (= 1.0.0)
+      null_attr
 
 PATH
   remote: /Users/litch/code/obsidian/logger

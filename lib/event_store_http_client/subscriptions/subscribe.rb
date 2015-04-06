@@ -54,33 +54,8 @@ module EventStore
 
           request = client.get(body_embed_link) do |resp|
 
-            resp.body_handler do |body|
+            resp.body_handler = body_handler
 
-              if body.length > 0
-                parsed_body = JSON.parse(body.to_s)
-                links = parsed_body['links']
-
-                parsed_body['entries'].reverse.map{|e|
-                  logger.trace "Executing handler for #{e} with #{handler.inspect}"
-                  ::Retry.!(->(attempt){
-                    handler.!(e, attempt)
-                    #persist_successfully_handled_event(e['id'])
-                  })
-                }
-
-                if previous_link = links.find{|link| link['relation'] == 'previous'}
-                  @request_string = previous_link['uri']
-                end
-                make_request
-              else
-                logger.error "There was an error (#{resp.status_code}) with the subscription request.  Retrying"
-                Vertx.set_timer(rand(1000)) do
-                  make_request
-                end
-              end
-
-
-            end
           end
 
           request.put_header('Accept', 'application/vnd.eventstore.atom+json')
@@ -95,6 +70,41 @@ module EventStore
 
           request.end
         end
+
+        def body_handler(body)
+          if body.length > 0
+            handle_success(body)
+          else
+            handle_failure(:unknown)
+          end
+        end
+
+
+        def handle_success(raw_body)
+          body = JSON.parse(raw_body.to_s)
+          links = body['links']
+
+          body['entries'].reverse.map{|e|
+            logger.trace "Executing handler for #{e} with #{handler.inspect}"
+            ::Retry.!(->(attempt){
+              handler.!(e, attempt)
+              #persist_successfully_handled_event(e['id'])
+            })
+          }
+
+          if previous_link = links.find{|link| link['relation'] == 'previous'}
+            @request_string = previous_link['uri']
+          end
+          make_request
+        end
+
+        def handle_failure(status_code)
+          logger.error "There was an error (#{resp.status_code}) with the subscription request.  Retrying"
+          Vertx.set_timer(rand(1000)+10) do
+            make_request
+          end
+        end
+
       end
     end
   end
