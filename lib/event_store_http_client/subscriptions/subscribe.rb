@@ -53,9 +53,7 @@ module EventStore
           logger.debug body_embed_link
 
           request = client.get(body_embed_link) do |resp|
-
             resp.body_handler = body_handler
-
           end
 
           request.put_header('Accept', 'application/vnd.eventstore.atom+json')
@@ -99,7 +97,7 @@ module EventStore
         end
 
         def handle_failure(status_code)
-          logger.error "There was an error (#{resp.status_code}) with the subscription request.  Retrying"
+          logger.error "There was an error (#{status_code}) with the subscription request.  Retrying"
           Vertx.set_timer(rand(1000)+10) do
             make_request
           end
