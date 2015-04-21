@@ -53,7 +53,9 @@ module EventStore
           logger.debug body_embed_link
 
           request = client.get(body_embed_link) do |resp|
-            resp.body_handler = body_handler
+            resp.body_handler do |body|
+              body_handler(body)
+            end
           end
 
           request.put_header('Accept', 'application/vnd.eventstore.atom+json')

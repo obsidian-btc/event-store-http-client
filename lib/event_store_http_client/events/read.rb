@@ -9,23 +9,6 @@ module EventStore
         dependency :client
         dependency :logger, Logger
 
-        def self.!(params)
-          instance = build(params)
-          instance.! do |result|
-            yield result
-          end
-        end
-
-        def self.build(params)
-          body = params[:body]
-          stream_name = params[:stream_name]
-
-          new(stream_name).tap do |instance|
-            Logger.configure instance
-            EventStore::HTTPClient::Client::Builder.configure instance
-          end
-        end
-
         def initialize(stream_name)
           @stream_name = stream_name
         end
@@ -62,6 +45,23 @@ module EventStore
           }
 
           request.end
+        end
+
+        def self.!(params)
+          instance = build(params)
+          instance.! do |result|
+            yield result
+          end
+        end
+
+        def self.build(params)
+          body = params[:body]
+          stream_name = params[:stream_name]
+
+          new(stream_name).tap do |instance|
+            Logger.configure instance
+            EventStore::HTTPClient::Client::Builder.configure instance
+          end
         end
       end
     end

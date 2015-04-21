@@ -3,7 +3,7 @@ Gem::Specification.new do |s|
   s.name = 'event_store_http_client'
   s.summary = 'HTTP EventStore client'
   s.version = '0.0.0'
-  s.authors = ['']
+  s.authors = ['j@obsidianexchange.com']
   s.require_paths = ['lib']
   s.files = Dir.glob('{lib}/**/*')
   s.platform = Gem::Platform::RUBY
