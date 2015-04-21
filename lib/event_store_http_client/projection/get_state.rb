@@ -7,7 +7,7 @@ module EventStore
         attr_accessor :partition
 
         dependency :client
-        dependency :logger, Logger
+        dependency :logger, Telemetry::Logger
 
         def self.!(params)
           instance = build(params)
@@ -21,7 +21,7 @@ module EventStore
           partition = params[:partition]
 
           new(projection, partition).tap do |instance|
-            Logger.configure instance
+            Telemetry::Logger.configure instance
             EventStore::HTTPClient::Client::Builder.configure instance
           end
         end

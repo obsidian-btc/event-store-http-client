@@ -21,11 +21,11 @@ module Example
     end
 
     class Command
-      dependency :logger, Logger
+      dependency :logger, Telemetry::Logger
 
       def self.build(params)
         new.tap do |instance|
-          Logger.configure instance
+          Telemetry::Logger.configure instance
         end
       end
 

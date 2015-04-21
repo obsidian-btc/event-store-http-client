@@ -17,11 +17,6 @@ PATH
       null_attr
 
 PATH
-  remote: /Users/litch/code/obsidian/logger
-  specs:
-    logger (0.0.0)
-
-PATH
   remote: /Users/litch/code/obsidian/null-attr
   specs:
     null_attr (0.0.0)
@@ -32,6 +27,11 @@ PATH
   specs:
     settings (0.0.0)
       confstruct (= 0.2.7)
+
+PATH
+  remote: /Users/litch/code/obsidian/telemetry-logger
+  specs:
+    telemetry_logger (0.0.0)
 
 PATH
   remote: /Users/litch/code/obsidian/uuid
@@ -65,9 +65,9 @@ DEPENDENCIES
   attribute!
   clock!
   dependency!
-  logger!
   naught (= 1.0.0)
   null_attr!
   rspec (~> 3.2.0)
   settings!
+  telemetry_logger!
   uuid!

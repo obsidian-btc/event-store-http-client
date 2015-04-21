@@ -10,7 +10,7 @@ module EventStore
         attr_accessor :version
         attr_accessor :type
 
-        dependency :logger, Logger
+        dependency :logger, Telemetry::Logger
         dependency :settings
         dependency :client
 
@@ -79,7 +79,7 @@ module EventStore
           stream_name = params[:stream_name]
 
           new(type, data, stream_name, version).tap do |instance|
-            Logger.configure instance
+            Telemetry::Logger.configure instance
             EventStore::HTTPClient::Client::Builder.configure instance
             instance.id = UUID::Random.get
           end

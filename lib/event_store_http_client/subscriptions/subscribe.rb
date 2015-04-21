@@ -18,7 +18,7 @@ module EventStore
         attr_accessor :handler
 
         dependency :client
-        dependency :logger, Logger
+        dependency :logger, Telemetry::Logger
 
         def self.!(params)
           instance = build(params)
@@ -32,7 +32,7 @@ module EventStore
           new(stream, starting_point).tap do |instance|
             handler.configure instance
             EventStore::HTTPClient::Client::Builder.configure instance
-            Logger.configure instance
+            Telemetry::Logger.configure instance
           end
         end
 

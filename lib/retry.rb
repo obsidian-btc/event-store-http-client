@@ -1,6 +1,6 @@
 class Retry
   def self.!(block, attempt=0)
-    logger = Logger.get self
+    logger = Telemetry::Logger.get self
     logger.debug "Executing #{block}, attempt: #{attempt}"
     begin
       block.call(attempt)

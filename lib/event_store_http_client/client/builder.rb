@@ -14,7 +14,7 @@ module EventStore
 
         def self.configure(receiver)
           instance = build
-          logger = Logger.get self
+          logger = Telemetry::Logger.get self
           logger.trace "Configuring Client"
 
           client = Vertx::HttpClient.new.tap do |client|

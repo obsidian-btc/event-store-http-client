@@ -7,7 +7,7 @@ module EventStore
         attr_accessor :body
 
         dependency :client
-        dependency :logger, Logger
+        dependency :logger, Telemetry::Logger
 
         def initialize(stream_name)
           @stream_name = stream_name
@@ -59,7 +59,7 @@ module EventStore
           stream_name = params[:stream_name]
 
           new(stream_name).tap do |instance|
-            Logger.configure instance
+            Telemetry::Logger.configure instance
             EventStore::HTTPClient::Client::Builder.configure instance
           end
         end

@@ -2,7 +2,7 @@ module EventStore
   module HTTPClient
     module Handler
       def self.included(cls)
-        cls.send :dependency, :logger, Logger
+        cls.send :dependency, :logger, Telemetry::Logger
         cls.extend Build unless cls.ancestors.include? Build
       end
 
@@ -24,13 +24,13 @@ module EventStore
       module Build
         def build
           new.tap do |instance|
-            Logger.configure instance
+            Telemetry::Logger.configure instance
           end
         end
       end
 
       class NullCommand
-        dependency :logger, Logger
+        dependency :logger, Telemetry::Logger
         attr_accessor :event_type
 
         def !
@@ -39,7 +39,7 @@ module EventStore
 
         def self.build(event_type)
           new.tap do |instance|
-            Logger.configure instance
+            Telemetry::Logger.configure instance
             instance.event_type = event_type
           end
         end
