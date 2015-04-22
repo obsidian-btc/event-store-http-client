@@ -14,14 +14,12 @@ module EventStore
         dependency :settings
         dependency :client
 
-        def initialize(type, data, stream_name, version)
-          @type = type
-          @data = data
-          @stream_name = stream_name
-          @version = version
-        end
+        def !(params)
+          @type = params[:type]
+          @version = params[:version]
+          @data = params[:data].to_json
+          @stream_name = params[:stream_name]
 
-        def !
           make_request do |result|
             yield result
           end
@@ -66,19 +64,14 @@ module EventStore
         end
 
         def self.!(params)
-          instance = build(params)
-          instance.! do |result|
+          instance = build
+          instance.!(params) do |result|
             yield result if block_given?
           end
         end
 
-        def self.build(params)
-          type = params[:type]
-          version = params[:version]
-          data = params[:data].to_json
-          stream_name = params[:stream_name]
-
-          new(type, data, stream_name, version).tap do |instance|
+        def self.build
+          new.tap do |instance|
             Telemetry::Logger.configure instance
             EventStore::HTTPClient::Client::Builder.configure instance
             instance.id = UUID::Random.get
