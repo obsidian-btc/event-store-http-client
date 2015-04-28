@@ -7,6 +7,7 @@ require 'settings'
 Settings.activate
 
 require 'event_store/retry'
+require 'event_store/http_client/event'
 require 'event_store/http_client/settings'
 require 'event_store/http_client/handler'
 require 'event_store/http_client/client/builder'
