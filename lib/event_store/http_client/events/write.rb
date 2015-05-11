@@ -3,12 +3,12 @@ module EventStore
     module Events
       class Write
 
-        attr_accessor :data
         attr_accessor :id
+        attr_accessor :type
         attr_accessor :stream_name
         attr_accessor :location
         attr_accessor :version
-        attr_accessor :type
+        attr_accessor :data
 
         dependency :logger, Telemetry::Logger
         dependency :settings

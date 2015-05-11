@@ -3,9 +3,9 @@ module EventStore
     class Event
       attr_accessor :id
       attr_accessor :type
-      attr_accessor :data
       attr_accessor :version
       attr_accessor :stream_name
+      attr_accessor :data
 
       def self.build(data)
         data[:id] = UUID.random unless data[:id]
@@ -23,9 +23,9 @@ module EventStore
         (
           id = other.id &&
           type = other.type &&
-          data = other.data &&
+          stream_name = other.stream_name &&
           version = other.version &&
-          stream_name = other.stream_name
+          data = other.data
         )
       end
       alias :eql :==
