@@ -20,7 +20,6 @@ module EventStore
       end
 
       def ==(other)
-        Telemetry::Logger.debug other
         (
           id = other.id &&
           type = other.type &&
