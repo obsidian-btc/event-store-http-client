@@ -5,7 +5,7 @@ ENV['PROX_GEM_DIR'] = File.expand_path(File.join(File.dirname(__FILE__), '..'))
 source 'https://rubygems.org'
 
 prox_gem 'attribute'
-prox_gem 'null_attr'
+prox_gem 'subst_attr'
 prox_gem 'dependency'
 prox_gem 'telemetry_logger'
 prox_gem 'uuid'
